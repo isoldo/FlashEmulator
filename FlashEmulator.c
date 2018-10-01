@@ -119,6 +119,7 @@ int flash_read(void* dest, unsigned int size, unsigned int addr)
 		return -3;
 	}
 
+#if FLASH_DEBUG
 	printf("%s(%p, %u, %08X):",__func__,dest,size,addr);
 	for (i=0; i<size; ++i)
 	{
@@ -129,6 +130,7 @@ int flash_read(void* dest, unsigned int size, unsigned int addr)
 		printf("%02X ", dest[i]);
 	}
 	printf("\r\n");
+#endif
 
 	fclose(memory);
 
@@ -203,7 +205,7 @@ int flash_write(void* src, unsigned int size, unsigned int addr)
 		fclose(memory);
 		return -4;
 	}
-
+#if FLASH_DEBUG
 	printf("%s data to write:",__func__);
 	for (i=0; i<size; ++i)
 	{
@@ -228,6 +230,7 @@ int flash_write(void* src, unsigned int size, unsigned int addr)
 		printf("%02X ", buffer[i]);
 	}
 	printf("\r\n");
+#endif
 
 	fclose(memory);
 
