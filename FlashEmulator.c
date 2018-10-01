@@ -119,7 +119,7 @@ int flash_read(void* dest, unsigned int size, unsigned int addr)
 		return -3;
 	}
 
-#if FLASH_DEBUG
+#if PRINT_READ_DATA
 	printf("%s(%p, %u, %08X):",__func__,dest,size,addr);
 	for (i=0; i<size; ++i)
 	{
@@ -205,7 +205,7 @@ int flash_write(void* src, unsigned int size, unsigned int addr)
 		fclose(memory);
 		return -4;
 	}
-#if FLASH_DEBUG
+#if PRINT_DATA_TO_WRITE
 	printf("%s data to write:",__func__);
 	for (i=0; i<size; ++i)
 	{
@@ -216,10 +216,15 @@ int flash_write(void* src, unsigned int size, unsigned int addr)
 		printf("%02X ",src[i]);
 	}
 	printf("\r\n");
+#endif
 
+#if PRINT_WRITTEN_DATA
 	fflush(memory);
+
 	fseek(memory, addr, SEEK_SET);
+
 	fread(buffer, 1, size, memory);
+
 	printf("%s(%p, %u, %08X):",__func__,src,size,addr);
 	for (i=0; i<size; ++i)
 	{
