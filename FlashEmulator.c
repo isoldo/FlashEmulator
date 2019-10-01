@@ -6,6 +6,12 @@
 #include "FlashEmulator.h"
 #include "FlashEmulator_Config.h"
 
+#if PRINT_ERRORS
+#define ERR(...) printf(__VA_ARGS__)
+#else
+#define ERR(...)
+#endif
+
 int flash_erase_sector(unsigned int addr)
 {
 	FILE* memory;
@@ -13,7 +19,7 @@ int flash_erase_sector(unsigned int addr)
 
 	if ( addr >= FLASH_SIZE )
 	{
-		printf("%s invalid address %u\r\n",__func__,addr);
+		ERR("%s invalid address %u\r\n",__func__,addr);
 		return -2;
 	}
 
@@ -21,7 +27,7 @@ int flash_erase_sector(unsigned int addr)
 
 	if ( NULL == memory )
 	{
-		printf("%s cannot open %s\r\n",__func__, FLASH_FILENAME);
+		ERR("%s cannot open %s\r\n",__func__, FLASH_FILENAME);
 		return -1;
 	}
 
@@ -52,7 +58,7 @@ int flash_format(void)
 
 	if ( NULL == memory )
 	{
-		printf("Cannot create %s\r\n",FLASH_FILENAME);
+		ERR("Cannot create %s\r\n",FLASH_FILENAME);
 		return -1;
 	}
 
@@ -93,12 +99,12 @@ int flash_read(void* dest, unsigned int size, unsigned int addr)
 
 	if (addr >= FLASH_SIZE)
 	{
-		printf("%s invalid address %u\r\n",__func__,addr);
+		ERR("%s invalid address %u\r\n",__func__,addr);
 		return -1;
 	}
 	if ( (addr+size) >= FLASH_SIZE )
 	{
-		printf("%s invalid size %u\r\n",__func__,size);
+		ERR("%s invalid size %u\r\n",__func__,size);
 		return -2;
 	}
 
@@ -110,7 +116,7 @@ int flash_read(void* dest, unsigned int size, unsigned int addr)
 		memory = fopen(FLASH_FILENAME,"rb");
 		if ( NULL == memory )
 		{
-			printf("%s cannot open %s\r\n",__func__,FLASH_FILENAME);
+			ERR("%s cannot open %s\r\n",__func__,FLASH_FILENAME);
 			exit(-1);
 		}
 	}
@@ -121,7 +127,7 @@ int flash_read(void* dest, unsigned int size, unsigned int addr)
 
 	if ( read != size )
 	{
-		printf("%s read error (%d/%d) %08X\r\n",__func__,read,size,addr);
+		ERR("%s read error (%d/%d) %08X\r\n",__func__,read,size,addr);
 		fclose(memory);
 		return -3;
 	}
@@ -153,12 +159,12 @@ int flash_write(void* src, unsigned int size, unsigned int addr)
 
 	if (addr >= FLASH_SIZE)
 	{
-		printf("%s invalid address %08X\r\n",__func__,addr);
+		ERR("%s invalid address %08X\r\n",__func__,addr);
 		return -1;
 	}
 	if ( (addr+size) >= FLASH_SIZE )
 	{
-		printf("%s invalid size %u\r\n",__func__,size);
+		ERR("%s invalid size %u\r\n",__func__,size);
 		return -2;
 	}
 
@@ -166,7 +172,7 @@ int flash_write(void* src, unsigned int size, unsigned int addr)
 
 	if ( NULL == memory )
 	{
-		printf("%s cannot open %s\r\n",__func__,FLASH_FILENAME);
+		ERR("%s cannot open %s\r\n",__func__,FLASH_FILENAME);
 		exit(-1);
 	}
 
@@ -174,7 +180,7 @@ int flash_write(void* src, unsigned int size, unsigned int addr)
 
 	if ( NULL == buffer )
 	{
-		printf("%s malloc failed\r\n",__func__);
+		ERR("%s malloc failed\r\n",__func__);
 		fclose(memory);
 		exit(-1);
 	}
@@ -184,7 +190,7 @@ int flash_write(void* src, unsigned int size, unsigned int addr)
 	read = fread(buffer, 1, size, memory);
 	if ( read != size )
 	{
-		printf("%s read error (%u/%u)\r\n",__func__,read,size);
+		ERR("%s read error (%u/%u)\r\n",__func__,read,size);
 		fclose(memory);
 		return -3;
 	}
@@ -208,7 +214,7 @@ int flash_write(void* src, unsigned int size, unsigned int addr)
 	written = fwrite(buffer, 1, size, memory);
 	if ( written != size )
 	{
-		printf("%s write error (%u/%u) %08X\r\n",__func__, written, size, addr);
+		ERR("%s write error (%u/%u) %08X\r\n",__func__, written, size, addr);
 		fclose(memory);
 		return -4;
 	}
@@ -259,14 +265,14 @@ int pretty(void)
 	memory = fopen(FLASH_FILENAME, "rb");
 	if ( NULL == memory )
 	{
-		printf("%s cannot open %s\r\n", __func__, FLASH_FILENAME);
+		ERR("%s cannot open %s\r\n", __func__, FLASH_FILENAME);
 		return -1;
 	}
 
 	pretty_memory = fopen(PRETTY_FILENAME, "w");
 	if ( NULL == pretty_memory )
 	{
-		printf("%s cannot create %s\r\n", __func__, PRETTY_FILENAME);
+		ERR("%s cannot create %s\r\n", __func__, PRETTY_FILENAME);
 		fclose(memory);
 		return -1;
 	}
