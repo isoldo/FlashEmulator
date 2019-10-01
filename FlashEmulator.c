@@ -6,7 +6,7 @@
 #include "FlashEmulator.h"
 #include "FlashEmulator_Config.h"
 
-void flash_erase_sector(unsigned int addr)
+int flash_erase_sector(unsigned int addr)
 {
 	FILE* memory;
 	uint8_t empty_sector[SECTOR_SIZE];
@@ -14,7 +14,7 @@ void flash_erase_sector(unsigned int addr)
 	if ( addr >= FLASH_SIZE )
 	{
 		printf("%s invalid address %u\r\n",__func__,addr);
-		return;
+		return -2;
 	}
 
 	memory = fopen(FLASH_FILENAME,"rb+");
@@ -22,7 +22,7 @@ void flash_erase_sector(unsigned int addr)
 	if ( NULL == memory )
 	{
 		printf("%s cannot open %s\r\n",__func__, FLASH_FILENAME);
-		exit(-1);
+		return -1;
 	}
 
 	printf("%s %08X\r\n", __func__, addr);
@@ -36,9 +36,11 @@ void flash_erase_sector(unsigned int addr)
 	fwrite(empty_sector, 1, SECTOR_SIZE, memory);
 
 	fclose(memory);
+	
+	return 0;
 }
 
-void flash_format(void)
+int flash_format(void)
 {
 	int i;
 	uint8_t empty_sector[SECTOR_SIZE];
@@ -51,15 +53,20 @@ void flash_format(void)
 	if ( NULL == memory )
 	{
 		printf("Cannot create %s\r\n",FLASH_FILENAME);
-		exit(-1);
+		return -1;
 	}
 
 	fclose(memory);
 
 	for (i=0; i<SECTOR_COUNT; ++i)
 	{
-		flash_erase_sector(i*SECTOR_SIZE);
+		if (0 != flash_erase_sector(i*SECTOR_SIZE))
+        {
+            return -2;
+        }
 	}
+    
+    return 0;
 }
 
 void flash_init(void)
@@ -242,7 +249,7 @@ int flash_write(void* src, unsigned int size, unsigned int addr)
 	return 0;
 }
 
-void pretty(void)
+int pretty(void)
 {
 	int i,j,k;
 	FILE* memory;
@@ -253,7 +260,7 @@ void pretty(void)
 	if ( NULL == memory )
 	{
 		printf("%s cannot open %s\r\n", __func__, FLASH_FILENAME);
-		return;
+		return -1;
 	}
 
 	pretty_memory = fopen(PRETTY_FILENAME, "w");
@@ -261,7 +268,7 @@ void pretty(void)
 	{
 		printf("%s cannot create %s\r\n", __func__, PRETTY_FILENAME);
 		fclose(memory);
-		exit(-1);
+		return -1;
 	}
 	fprintf(pretty_memory, "         ");
 	for (i=0; i<(SECTOR_COUNT); ++i)
@@ -290,4 +297,6 @@ void pretty(void)
 	}
 	fclose(memory);
 	fclose(pretty_memory);
+    
+    return 0;
 }
